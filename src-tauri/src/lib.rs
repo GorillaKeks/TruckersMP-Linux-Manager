@@ -264,6 +264,32 @@ fn get_truckersmp_info() -> TruckersMpInfo {
     }
 }
 
+#[tauri::command]
+fn start_truckersmp() -> Result<String, String> {
+    let cli = "/home/gorillakeks/truckersmp-cli/.venv/bin/truckersmp-cli";
+    let gamedir = "/mnt/games/TruckersMP/ETS2";
+    let protondir = "/mnt/games/TruckersMP/Proton";
+    let runtime = "/mnt/games/TruckersMP/SteamRuntime";
+
+    let process = Command::new(cli)
+        .args([
+            "-g",
+            gamedir,
+            "-o",
+            protondir,
+            "--steamruntimedir",
+            runtime,
+            "start",
+            "ets2mp",
+        ])
+        .env("__NV_PRIME_RENDER_OFFLOAD", "1")
+        .env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
+        .spawn()
+        .map_err(|error| format!("Failed to start TruckersMP: {error}"))?;
+
+    Ok(format!("TruckersMP started (PID {})", process.id()))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -271,7 +297,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             get_system_info,
             get_steam_info,
-            get_truckersmp_info
+            get_truckersmp_info,
+            start_truckersmp
         ])
         .run(tauri::generate_context!())
         .expect("error while running application");
