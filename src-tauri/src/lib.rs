@@ -1,6 +1,7 @@
+use serde::Serialize;
 use std::process::Command;
 
-#[derive(serde::Serialize)]
+#[derive(Serialize)]
 struct SystemInfo {
     os: String,
     kernel: String,
@@ -9,34 +10,54 @@ struct SystemInfo {
     gpu: String,
 }
 
+fn command_output(command: &str, args: &[&str]) -> String {
+    Command::new(command)
+        .args(args)
+        .output()
+        .ok()
+        .and_then(|output| {
+            if output.status.success() {
+                Some(String::from_utf8_lossy(&output.stdout).trim().to_string())
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| "Unknown".to_string())
+}
+
 #[tauri::command]
 fn get_system_info() -> SystemInfo {
-    let os = read_command("lsb_release", &["-ds"])
-        .unwrap_or_else(|| "Linux".to_string())
-        .trim_matches('"')
-        .to_string();
+    let os = command_output("lsb_release", &["-ds"]);
+    let kernel = command_output("uname", &["-r"]);
 
-    let kernel = read_command("uname", &["-r"])
-        .unwrap_or_else(|| "Unknown".to_string());
+    let cpu = command_output(
+        "bash",
+        &["-c", "lscpu | grep 'Model name' | cut -d: -f2- | xargs"],
+    );
 
-    let cpu = read_command("lscpu", &["-p=model"])
-        .unwrap_or_else(|| "Unknown".to_string())
-        .lines()
-        .filter(|line| !line.starts_with('#'))
-        .next()
-        .unwrap_or("Unknown")
-        .to_string();
+    let memory = command_output(
+        "bash",
+        &[
+            "-c",
+            "free -h | awk '/^Mem:/ {print $3 \" / \" $2}'",
+        ],
+    );
 
-    let memory = read_command("free", &["-h"])
-        .and_then(|output| {
-            output
-                .lines()
-                .find(|line| line.starts_with("Mem:"))
-                .map(|line| line.to_string())
-        })
-        .unwrap_or_else(|| "Unknown".to_string());
+    let gpu = {
+        let nvidia = command_output(
+            "nvidia-smi",
+            &["--query-gpu=name", "--format=csv,noheader"],
+        );
 
-    let gpu = detect_gpu();
+        if nvidia != "Unknown" {
+            nvidia
+        } else {
+            command_output(
+                "bash",
+                &["-c", "lspci | grep -Ei 'vga|3d|display' | head -1"],
+            )
+        }
+    };
 
     SystemInfo {
         os,
@@ -45,41 +66,6 @@ fn get_system_info() -> SystemInfo {
         memory,
         gpu,
     }
-}
-
-fn detect_gpu() -> String {
-    if let Some(output) = read_command("nvidia-smi", &["--query-gpu=name", "--format=csv,noheader"]) {
-        let gpu = output.trim();
-
-        if !gpu.is_empty() {
-            return gpu.to_string();
-        }
-    }
-
-    if let Some(output) = read_command("lspci", &[]) {
-        for line in output.lines() {
-            if line.contains("VGA compatible controller")
-                || line.contains("3D controller")
-                || line.contains("Display controller")
-            {
-                if let Some((_, gpu)) = line.split_once(": ") {
-                    return gpu.trim().to_string();
-                }
-            }
-        }
-    }
-
-    "Unknown".to_string()
-}
-
-fn read_command(command: &str, args: &[&str]) -> Option<String> {
-    let output = Command::new(command).args(args).output().ok()?;
-
-    if !output.status.success() {
-        return None;
-    }
-
-    String::from_utf8(output.stdout).ok()
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
