@@ -34,14 +34,27 @@ interface TruckersMpInfo {
   steam_runtime_path: string | null;
 }
 
+function Status({ ok, children }: { ok: boolean; children: string }) {
+  return (
+    <strong className={ok ? "status-ok" : "status-error"}>
+      {ok ? "✓ " : "✗ "}
+      {children}
+    </strong>
+  );
+}
+
 function App() {
   const [system, setSystem] = useState<SystemInfo | null>(null);
   const [steam, setSteam] = useState<SteamInfo | null>(null);
   const [truckersMp, setTruckersMp] = useState<TruckersMpInfo | null>(null);
+
   const [loading, setLoading] = useState(true);
+  const [starting, setStarting] = useState(false);
+  const [startMessage, setStartMessage] = useState("");
 
   const loadData = async () => {
     setLoading(true);
+    setStartMessage("");
 
     try {
       const [systemInfo, steamInfo, truckersMpInfo] = await Promise.all([
@@ -60,6 +73,21 @@ function App() {
     }
   };
 
+  const startTruckersMp = async () => {
+    setStarting(true);
+    setStartMessage("");
+
+    try {
+      const message = await invoke<string>("start_truckersmp");
+      setStartMessage(message);
+    } catch (error) {
+      console.error("Failed to start TruckersMP:", error);
+      setStartMessage(`Failed to start TruckersMP: ${error}`);
+    } finally {
+      setStarting(false);
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, []);
@@ -68,7 +96,7 @@ function App() {
     <main className="container">
       <header>
         <h1>TruckersMP Linux Manager</h1>
-        <p>Linux gaming environment</p>
+        <p>Manage TruckersMP on Linux</p>
       </header>
 
       <section className="card">
@@ -117,38 +145,54 @@ function App() {
           <>
             <div className="status-row">
               <span>Steam</span>
-              <strong>
-                {steam.installed ? "✓ Detected" : "✗ Not detected"}
-              </strong>
+              <Status ok={steam.installed}>
+                {steam.installed ? "Detected" : "Not detected"}
+              </Status>
             </div>
 
             {steam.path && <p className="path">{steam.path}</p>}
+
+            {steam.libraries.length > 0 && (
+              <div className="libraries">
+                <span>Steam Libraries</span>
+
+                {steam.libraries.map((library) => (
+                  <small key={library}>{library}</small>
+                ))}
+              </div>
+            )}
 
             <div className="game-list">
               <div className="game">
                 <div>
                   <span>Euro Truck Simulator 2</span>
-                  {steam.ets2.path && <small>{steam.ets2.path}</small>}
+
+                  {steam.ets2.path && (
+                    <small>{steam.ets2.path}</small>
+                  )}
                 </div>
 
-                <strong>
+                <Status ok={steam.ets2.installed}>
                   {steam.ets2.installed
-                    ? "✓ Installed"
-                    : "✗ Not installed"}
-                </strong>
+                    ? "Installed"
+                    : "Not installed"}
+                </Status>
               </div>
 
               <div className="game">
                 <div>
                   <span>American Truck Simulator</span>
-                  {steam.ats.path && <small>{steam.ats.path}</small>}
+
+                  {steam.ats.path && (
+                    <small>{steam.ats.path}</small>
+                  )}
                 </div>
 
-                <strong>
+                <Status ok={steam.ats.installed}>
                   {steam.ats.installed
-                    ? "✓ Installed"
-                    : "✗ Not installed"}
-                </strong>
+                    ? "Installed"
+                    : "Not installed"}
+                </Status>
               </div>
             </div>
           </>
@@ -163,74 +207,105 @@ function App() {
         {loading ? (
           <p>Detecting TruckersMP...</p>
         ) : truckersMp ? (
-          <div className="game-list">
-            <div className="game">
-              <div>
-                <span>TruckersMP</span>
-                {truckersMp.path && (
-                  <small>{truckersMp.path}</small>
-                )}
+          <>
+            <div className="game-list">
+              <div className="game">
+                <div>
+                  <span>TruckersMP</span>
+
+                  {truckersMp.path && (
+                    <small>{truckersMp.path}</small>
+                  )}
+                </div>
+
+                <Status ok={truckersMp.installed}>
+                  {truckersMp.installed
+                    ? "Detected"
+                    : "Not detected"}
+                </Status>
               </div>
 
-              <strong>
-                {truckersMp.installed
-                  ? "✓ Detected"
-                  : "✗ Not detected"}
-              </strong>
-            </div>
+              <div className="game">
+                <div>
+                  <span>TruckersMP ETS2</span>
 
-            <div className="game">
-              <div>
-                <span>TruckersMP ETS2</span>
-                {truckersMp.ets2_path && (
-                  <small>{truckersMp.ets2_path}</small>
-                )}
+                  {truckersMp.ets2_path && (
+                    <small>{truckersMp.ets2_path}</small>
+                  )}
+                </div>
+
+                <Status ok={!!truckersMp.ets2_path}>
+                  {truckersMp.ets2_path
+                    ? "Detected"
+                    : "Not detected"}
+                </Status>
               </div>
 
-              <strong>
-                {truckersMp.ets2_path
-                  ? "✓ Detected"
-                  : "✗ Not detected"}
-              </strong>
-            </div>
+              <div className="game">
+                <div>
+                  <span>Proton</span>
 
-            <div className="game">
-              <div>
-                <span>Proton</span>
-                {truckersMp.proton_path && (
-                  <small>{truckersMp.proton_path}</small>
-                )}
+                  {truckersMp.proton_path && (
+                    <small>{truckersMp.proton_path}</small>
+                  )}
+                </div>
+
+                <Status ok={truckersMp.proton_installed}>
+                  {truckersMp.proton_installed
+                    ? "Detected"
+                    : "Not detected"}
+                </Status>
               </div>
 
-              <strong>
-                {truckersMp.proton_installed
-                  ? "✓ Detected"
-                  : "✗ Not detected"}
-              </strong>
-            </div>
+              <div className="game">
+                <div>
+                  <span>Steam Runtime</span>
 
-            <div className="game">
-              <div>
-                <span>Steam Runtime</span>
-                {truckersMp.steam_runtime_path && (
-                  <small>{truckersMp.steam_runtime_path}</small>
-                )}
+                  {truckersMp.steam_runtime_path && (
+                    <small>{truckersMp.steam_runtime_path}</small>
+                  )}
+                </div>
+
+                <Status ok={truckersMp.steam_runtime_installed}>
+                  {truckersMp.steam_runtime_installed
+                    ? "Detected"
+                    : "Not detected"}
+                </Status>
               </div>
-
-              <strong>
-                {truckersMp.steam_runtime_installed
-                  ? "✓ Detected"
-                  : "✗ Not detected"}
-              </strong>
             </div>
-          </div>
+
+            <div className="button-row">
+              <button
+                onClick={loadData}
+                disabled={loading || starting}
+              >
+                {loading ? "Detecting..." : "Refresh"}
+              </button>
+
+              <button
+                onClick={startTruckersMp}
+                disabled={
+                  loading ||
+                  starting ||
+                  !truckersMp.installed ||
+                  !truckersMp.ets2_path ||
+                  !truckersMp.proton_installed ||
+                  !truckersMp.steam_runtime_installed
+                }
+              >
+                {starting ? "Starting..." : "Start TruckersMP"}
+              </button>
+            </div>
+
+            {startMessage && (
+              <p className="start-message">
+                {startMessage}
+              </p>
+            )}
+          </>
         ) : (
           <p>Unable to detect TruckersMP.</p>
         )}
-
-        <button onClick={loadData} disabled={loading}>
-          {loading ? "Detecting..." : "Refresh"}
-        </button>
       </section>
     </main>
   );
