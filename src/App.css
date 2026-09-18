@@ -1,17 +1,29 @@
-
 :root {
-  font-family: Inter, system-ui, sans-serif;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #2b211b;
   background: #f5efe6;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
   min-width: 320px;
+  min-height: 100vh;
+  background: #f5efe6;
+}
+
+button {
+  font: inherit;
 }
 
 .container {
-  max-width: 900px;
+  width: 100%;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 40px;
 }
@@ -20,60 +32,133 @@ header {
   margin-bottom: 30px;
 }
 
-h1 {
+header h1 {
   margin: 0;
   font-size: 32px;
+  font-weight: 700;
 }
 
 header p {
-  margin-top: 8px;
+  margin: 8px 0 0;
   color: #77685d;
+  font-size: 16px;
 }
 
 .card {
-  background: #fffaf3;
-  border-radius: 16px;
+  margin-bottom: 24px;
   padding: 28px;
+  background: #fffaf3;
+  border: 1px solid #eadfd2;
+  border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
 .card h2 {
-  margin-top: 0;
+  margin: 0 0 22px;
+  font-size: 22px;
 }
 
 .system-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
-  margin: 25px 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
-.system-grid div {
+.system-grid > div {
+  min-width: 0;
   padding: 16px;
   background: #f3eadf;
   border-radius: 12px;
 }
 
-.system-grid span {
+.system-grid span,
+.game span {
   display: block;
-  font-size: 13px;
-  color: #77685d;
   margin-bottom: 6px;
+  color: #77685d;
+  font-size: 13px;
 }
 
 .system-grid strong {
   display: block;
-  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-size: 15px;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+  background: #f3eadf;
+  border-radius: 12px;
+}
+
+.status-row strong {
+  white-space: nowrap;
+}
+
+.path {
+  margin: 8px 0 20px;
+  color: #77685d;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.game-list {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0 24px;
+}
+
+.game {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+  background: #f3eadf;
+  border-radius: 12px;
+}
+
+.game > div {
+  min-width: 0;
+}
+
+.game span {
+  margin-bottom: 5px;
+  color: #2b211b;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.game small {
+  display: block;
+  color: #77685d;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.game strong {
+  white-space: nowrap;
 }
 
 button {
   border: 0;
   border-radius: 10px;
-  padding: 11px 18px;
+  padding: 11px 20px;
   background: #e87524;
-  color: white;
+  color: #ffffff;
   font-weight: 600;
   cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 button:disabled {
@@ -81,12 +166,22 @@ button:disabled {
   cursor: default;
 }
 
-@media (max-width: 650px) {
+@media (max-width: 700px) {
   .container {
     padding: 20px;
   }
 
   .system-grid {
     grid-template-columns: 1fr;
+  }
+
+  .game {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .status-row {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
