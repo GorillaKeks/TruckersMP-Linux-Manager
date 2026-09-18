@@ -56,10 +56,17 @@ function Status({
   children: string;
 }) {
   return (
-    <span className={ok ? "status status-ok" : "status status-error"}>
+    <span
+      className={
+        ok
+          ? "status status-ok"
+          : "status status-error"
+      }
+    >
       <span className="status-dot">
         {ok ? "✓" : "!"}
       </span>
+
       {children}
     </span>
   );
@@ -68,35 +75,63 @@ function Status({
 function App() {
   const [page, setPage] = useState<Page>("home");
 
-  const [system, setSystem] = useState<SystemInfo | null>(null);
-  const [steam, setSteam] = useState<SteamInfo | null>(null);
+  const [system, setSystem] =
+    useState<SystemInfo | null>(null);
+
+  const [steam, setSteam] =
+    useState<SteamInfo | null>(null);
+
   const [truckersMp, setTruckersMp] =
     useState<TruckersMpInfo | null>(null);
+
   const [processStatus, setProcessStatus] =
     useState<ProcessStatus | null>(null);
 
-  const [loading, setLoading] = useState(true);
-  const [starting, setStarting] = useState(false);
-  const [startMessage, setStartMessage] = useState("");
+  const [loading, setLoading] =
+    useState(true);
+
+  const [starting, setStarting] =
+    useState(false);
+
+  const [startMessage, setStartMessage] =
+    useState("");
 
   const loadData = async () => {
     setLoading(true);
 
     try {
-      const [systemInfo, steamInfo, truckersMpInfo, status] =
-        await Promise.all([
-          invoke<SystemInfo>("get_system_info"),
-          invoke<SteamInfo>("get_steam_info"),
-          invoke<TruckersMpInfo>("get_truckersmp_info"),
-          invoke<ProcessStatus>("get_process_status"),
-        ]);
+      const [
+        systemInfo,
+        steamInfo,
+        truckersMpInfo,
+        status,
+      ] = await Promise.all([
+        invoke<SystemInfo>(
+          "get_system_info",
+        ),
+
+        invoke<SteamInfo>(
+          "get_steam_info",
+        ),
+
+        invoke<TruckersMpInfo>(
+          "get_truckersmp_info",
+        ),
+
+        invoke<ProcessStatus>(
+          "get_process_status",
+        ),
+      ]);
 
       setSystem(systemInfo);
       setSteam(steamInfo);
       setTruckersMp(truckersMpInfo);
       setProcessStatus(status);
     } catch (error) {
-      console.error("Detection failed:", error);
+      console.error(
+        "Detection failed:",
+        error,
+      );
     } finally {
       setLoading(false);
     }
@@ -105,11 +140,16 @@ function App() {
   const updateProcessStatus = async () => {
     try {
       const status =
-        await invoke<ProcessStatus>("get_process_status");
+        await invoke<ProcessStatus>(
+          "get_process_status",
+        );
 
       setProcessStatus(status);
     } catch (error) {
-      console.error("Process status failed:", error);
+      console.error(
+        "Process status failed:",
+        error,
+      );
     }
   };
 
@@ -119,11 +159,16 @@ function App() {
 
     try {
       const message =
-        await invoke<string>("start_truckersmp");
+        await invoke<string>(
+          "start_truckersmp",
+        );
 
       setStartMessage(message);
 
-      setTimeout(updateProcessStatus, 2000);
+      setTimeout(
+        updateProcessStatus,
+        2000,
+      );
     } catch (error) {
       console.error(
         "Failed to start TruckersMP:",
@@ -148,14 +193,17 @@ function App() {
       2000,
     );
 
-    return () => clearInterval(interval);
+    return () =>
+      clearInterval(interval);
   }, []);
 
   const truckersMpRunning =
-    processStatus?.truckersmp_running ?? false;
+    processStatus?.truckersmp_running ??
+    false;
 
   const ets2Running =
-    processStatus?.ets2_running ?? false;
+    processStatus?.ets2_running ??
+    false;
 
   const ets2Installed =
     steam?.ets2.installed ?? false;
@@ -163,13 +211,19 @@ function App() {
   const atsInstalled =
     steam?.ats.installed ?? false;
 
-  const systemReady = !!system;
-  const steamReady = steam?.installed ?? false;
-  const truckersMpReady = truckersMp?.installed ?? false;
+  const steamReady =
+    steam?.installed ?? false;
+
+  const truckersMpReady =
+    truckersMp?.installed ?? false;
+
   const protonReady =
-    truckersMp?.proton_installed ?? false;
+    truckersMp?.proton_installed ??
+    false;
+
   const runtimeReady =
-    truckersMp?.steam_runtime_installed ?? false;
+    truckersMp?.steam_runtime_installed ??
+    false;
 
   const navigate = (target: Page) => {
     setPage(target);
@@ -179,16 +233,22 @@ function App() {
     switch (page) {
       case "ets2":
         return "Euro Truck Simulator 2";
+
       case "ats":
         return "American Truck Simulator";
+
       case "updates":
         return "Updates";
+
       case "settings":
         return "Settings";
+
       case "logs":
         return "Logs";
+
       case "about":
         return "About";
+
       default:
         return "Home";
     }
@@ -208,12 +268,15 @@ function App() {
       <h2>{renderPageTitle()}</h2>
 
       <p>
-        This section is currently under development.
+        This section is currently under
+        development.
       </p>
 
       <button
         className="secondary-button"
-        onClick={() => navigate("home")}
+        onClick={() =>
+          navigate("home")
+        }
       >
         ← Back to Home
       </button>
@@ -222,26 +285,41 @@ function App() {
 
   return (
     <div className="app-shell">
+
       <aside className="sidebar">
+
         <div className="sidebar-brand">
-          <div className="brand-icon">🚛</div>
+          <div className="brand-icon">
+            🚛
+          </div>
 
           <div>
-            <strong>TruckersMP</strong>
-            <span>Linux Manager</span>
+            <strong>
+              TruckersMP
+            </strong>
+
+            <span>
+              Linux Manager
+            </span>
           </div>
         </div>
 
         <nav className="sidebar-nav">
+
           <button
             className={
               page === "home"
                 ? "nav-item active"
                 : "nav-item"
             }
-            onClick={() => navigate("home")}
+            onClick={() =>
+              navigate("home")
+            }
           >
-            <span className="nav-icon">⌂</span>
+            <span className="nav-icon">
+              ⌂
+            </span>
+
             <span>Home</span>
           </button>
 
@@ -251,10 +329,17 @@ function App() {
                 ? "nav-item active"
                 : "nav-item"
             }
-            onClick={() => navigate("ets2")}
+            onClick={() =>
+              navigate("ets2")
+            }
           >
-            <span className="nav-icon">🚛</span>
-            <span>Euro Truck Simulator 2</span>
+            <span className="nav-icon">
+              🚛
+            </span>
+
+            <span>
+              Euro Truck Simulator 2
+            </span>
           </button>
 
           <button
@@ -263,10 +348,17 @@ function App() {
                 ? "nav-item active"
                 : "nav-item"
             }
-            onClick={() => navigate("ats")}
+            onClick={() =>
+              navigate("ats")
+            }
           >
-            <span className="nav-icon">🚛</span>
-            <span>American Truck Simulator</span>
+            <span className="nav-icon">
+              🚛
+            </span>
+
+            <span>
+              American Truck Simulator
+            </span>
           </button>
 
           <button
@@ -275,9 +367,14 @@ function App() {
                 ? "nav-item active"
                 : "nav-item"
             }
-            onClick={() => navigate("updates")}
+            onClick={() =>
+              navigate("updates")
+            }
           >
-            <span className="nav-icon">↻</span>
+            <span className="nav-icon">
+              ↻
+            </span>
+
             <span>Updates</span>
           </button>
 
@@ -287,9 +384,14 @@ function App() {
                 ? "nav-item active"
                 : "nav-item"
             }
-            onClick={() => navigate("settings")}
+            onClick={() =>
+              navigate("settings")
+            }
           >
-            <span className="nav-icon">⚙</span>
+            <span className="nav-icon">
+              ⚙
+            </span>
+
             <span>Settings</span>
           </button>
 
@@ -299,9 +401,14 @@ function App() {
                 ? "nav-item active"
                 : "nav-item"
             }
-            onClick={() => navigate("logs")}
+            onClick={() =>
+              navigate("logs")
+            }
           >
-            <span className="nav-icon">▤</span>
+            <span className="nav-icon">
+              ▤
+            </span>
+
             <span>Logs</span>
           </button>
 
@@ -311,32 +418,57 @@ function App() {
                 ? "nav-item active"
                 : "nav-item"
             }
-            onClick={() => navigate("about")}
+            onClick={() =>
+              navigate("about")
+            }
           >
-            <span className="nav-icon">ⓘ</span>
+            <span className="nav-icon">
+              ⓘ
+            </span>
+
             <span>About</span>
           </button>
+
         </nav>
 
         <div className="sidebar-footer">
-          <div className="sidebar-truck">🚚</div>
-          <strong>TRUCKERS<span>MP</span></strong>
-          <small>LINUX MANAGER</small>
+          <div className="sidebar-truck">
+            🚚
+          </div>
+
+          <strong>
+            TRUCKERS<span>MP</span>
+          </strong>
+
+          <small>
+            LINUX MANAGER
+          </small>
         </div>
+
       </aside>
 
       <main className="main-content">
+
         <header className="top-header">
+
           <div>
-            <h1>TruckersMP Linux Manager</h1>
-            <p>Play Together. Anywhere. On Linux.</p>
+            <h1>
+              TruckersMP Linux Manager
+            </h1>
+
+            <p>
+              Play Together. Anywhere. On Linux.
+            </p>
           </div>
 
           <div className="header-actions">
+
             <button
               className="icon-button"
               title="Settings"
-              onClick={() => navigate("settings")}
+              onClick={() =>
+                navigate("settings")
+              }
             >
               ⚙
             </button>
@@ -361,42 +493,71 @@ function App() {
             >
               ×
             </button>
+
           </div>
+
         </header>
 
         <div className="content">
+
           {page !== "home" ? (
             <>
               <div className="page-heading">
-                <h2>{renderPageTitle()}</h2>
+                <h2>
+                  {renderPageTitle()}
+                </h2>
               </div>
 
               {renderPlaceholderPage()}
             </>
           ) : (
             <>
+
               <section className="welcome">
+
                 <div>
-                  <h2>Welcome back!</h2>
+                  <h2>
+                    Welcome back!
+                  </h2>
+
                   <p>
-                    Manage ETS2, ATS and TruckersMP easily on Linux.
+                    Manage ETS2, ATS and
+                    TruckersMP easily on Linux.
                   </p>
                 </div>
+
               </section>
 
               <section className="game-grid">
+
+                {/* ETS2 */}
+
                 <article className="game-card">
+
                   <div className="game-card-top">
+
                     <div className="game-cover ets2-cover">
-                      <span>EURO TRUCK</span>
-                      <strong>SIMULATOR 2</strong>
+                      <span>
+                        EURO TRUCK
+                      </span>
+
+                      <strong>
+                        SIMULATOR 2
+                      </strong>
                     </div>
 
                     <div className="game-main">
-                      <h2>Euro Truck Simulator 2</h2>
+
+                      <h2>
+                        Euro Truck Simulator 2
+                      </h2>
 
                       <div className="ready-line">
-                        <span className="ready-dot" />
+
+                        <span
+                          className="ready-dot"
+                        />
+
                         <strong>
                           {ets2Running
                             ? "Running"
@@ -404,38 +565,63 @@ function App() {
                               ? "Ready to play"
                               : "Not installed"}
                         </strong>
+
                       </div>
+
                     </div>
 
                     <div className="game-version">
-                      <span>Game Version</span>
+
+                      <span>
+                        Game Version
+                      </span>
+
                       <strong>
                         {ets2Installed
                           ? "Detected"
                           : "—"}
                       </strong>
 
-                      <span>TruckersMP Version</span>
+                      <span>
+                        TruckersMP Version
+                      </span>
+
                       <strong>
                         {truckersMpReady
                           ? "Installed"
                           : "—"}
                       </strong>
+
                     </div>
+
                   </div>
 
                   <div className="game-details">
+
                     <div>
-                      <span className="detail-icon">●</span>
-                      <span>Steam Installation</span>
+                      <span className="detail-icon">
+                        ●
+                      </span>
+
+                      <span>
+                        Steam Installation
+                      </span>
+
                       <strong>
-                        {steam?.path ?? "Not detected"}
+                        {steam?.path ??
+                          "Not detected"}
                       </strong>
                     </div>
 
                     <div>
-                      <span className="detail-icon">▣</span>
-                      <span>Game Directory</span>
+                      <span className="detail-icon">
+                        ▣
+                      </span>
+
+                      <span>
+                        Game Directory
+                      </span>
+
                       <strong>
                         {truckersMp?.ets2_path ??
                           steam?.ets2.path ??
@@ -444,8 +630,14 @@ function App() {
                     </div>
 
                     <div>
-                      <span className="detail-icon">♟</span>
-                      <span>TruckersMP</span>
+                      <span className="detail-icon">
+                        ♟
+                      </span>
+
+                      <span>
+                        TruckersMP
+                      </span>
+
                       <strong>
                         {truckersMpReady
                           ? "Installed"
@@ -454,8 +646,14 @@ function App() {
                     </div>
 
                     <div>
-                      <span className="detail-icon">⚗</span>
-                      <span>Proton</span>
+                      <span className="detail-icon">
+                        ⚗
+                      </span>
+
+                      <span>
+                        Proton
+                      </span>
+
                       <strong>
                         {truckersMp?.proton_path ??
                           "Not detected"}
@@ -463,30 +661,39 @@ function App() {
                     </div>
 
                     <div>
-                      <span className="detail-icon">◈</span>
-                      <span>Steam Runtime</span>
+                      <span className="detail-icon">
+                        ◈
+                      </span>
+
+                      <span>
+                        Steam Runtime
+                      </span>
+
                       <strong>
                         {truckersMp?.steam_runtime_path ??
                           "Not detected"}
                       </strong>
                     </div>
+
                   </div>
 
                   <div className="game-actions">
+
                     <button
                       className="primary-button"
-                      onClick={startTruckersMp}
+                      onClick={
+                        startTruckersMp
+                      }
                       disabled={
                         loading ||
                         starting ||
-                        truckersMpRunning ||
-                        !truckersMpReady ||
-                        !truckersMp?.ets2_path ||
-                        !protonReady ||
-                        !runtimeReady
+                        truckersMpRunning
                       }
                     >
-                      <span>▶</span>
+                      <span>
+                        ▶
+                      </span>
+
                       {starting
                         ? "Starting..."
                         : truckersMpRunning
@@ -494,65 +701,114 @@ function App() {
                           : "Start ETS2 (TruckersMP)"}
                     </button>
 
-                    <button className="secondary-button">
+                    <button
+                      className="secondary-button"
+                    >
                       ↻ Update ETS2
                     </button>
 
-                    <button className="dropdown-button">
-                     ⌄
+                    <button
+                      className="dropdown-button"
+                    >
+                      ⌄
                     </button>
+
                   </div>
+
                 </article>
 
+                {/* ATS */}
+
                 <article className="game-card">
+
                   <div className="game-card-top">
+
                     <div className="game-cover ats-cover">
-                      <span>AMERICAN</span>
-                      <strong>TRUCK SIMULATOR</strong>
+
+                      <span>
+                        AMERICAN
+                      </span>
+
+                      <strong>
+                        TRUCK SIMULATOR
+                      </strong>
+
                     </div>
 
                     <div className="game-main">
-                      <h2>American Truck Simulator</h2>
+
+                      <h2>
+                        American Truck Simulator
+                      </h2>
 
                       <div className="ready-line">
-                        <span className="ready-dot" />
+
+                        <span
+                          className="ready-dot"
+                        />
+
                         <strong>
                           {atsInstalled
                             ? "Ready to play"
                             : "Not installed"}
                         </strong>
+
                       </div>
+
                     </div>
 
                     <div className="game-version">
-                      <span>Game Version</span>
+
+                      <span>
+                        Game Version
+                      </span>
+
                       <strong>
                         {atsInstalled
                           ? "Detected"
                           : "—"}
                       </strong>
 
-                      <span>TruckersMP Version</span>
+                      <span>
+                        TruckersMP Version
+                      </span>
+
                       <strong>
                         {truckersMpReady
                           ? "Installed"
                           : "—"}
                       </strong>
+
                     </div>
+
                   </div>
 
                   <div className="game-details">
+
                     <div>
-                      <span className="detail-icon">●</span>
-                      <span>Steam Installation</span>
+                      <span className="detail-icon">
+                        ●
+                      </span>
+
+                      <span>
+                        Steam Installation
+                      </span>
+
                       <strong>
-                        {steam?.path ?? "Not detected"}
+                        {steam?.path ??
+                          "Not detected"}
                       </strong>
                     </div>
 
                     <div>
-                      <span className="detail-icon">▣</span>
-                      <span>Game Directory</span>
+                      <span className="detail-icon">
+                        ▣
+                      </span>
+
+                      <span>
+                        Game Directory
+                      </span>
+
                       <strong>
                         {steam?.ats.path ??
                           "Not detected"}
@@ -560,8 +816,14 @@ function App() {
                     </div>
 
                     <div>
-                      <span className="detail-icon">♟</span>
-                      <span>TruckersMP</span>
+                      <span className="detail-icon">
+                        ♟
+                      </span>
+
+                      <span>
+                        TruckersMP
+                      </span>
+
                       <strong>
                         {truckersMpReady
                           ? "Installed"
@@ -570,8 +832,14 @@ function App() {
                     </div>
 
                     <div>
-                      <span className="detail-icon">⚗</span>
-                      <span>Proton</span>
+                      <span className="detail-icon">
+                        ⚗
+                      </span>
+
+                      <span>
+                        Proton
+                      </span>
+
                       <strong>
                         {truckersMp?.proton_path ??
                           "Not detected"}
@@ -579,16 +847,24 @@ function App() {
                     </div>
 
                     <div>
-                      <span className="detail-icon">◈</span>
-                      <span>Steam Runtime</span>
+                      <span className="detail-icon">
+                        ◈
+                      </span>
+
+                      <span>
+                        Steam Runtime
+                      </span>
+
                       <strong>
                         {truckersMp?.steam_runtime_path ??
                           "Not detected"}
                       </strong>
                     </div>
+
                   </div>
 
                   <div className="game-actions">
+
                     <button
                       className="primary-button"
                       disabled={
@@ -596,28 +872,47 @@ function App() {
                         !atsInstalled
                       }
                     >
-                      <span>▶</span>
+                      <span>
+                        ▶
+                      </span>
+
                       Start ATS (TruckersMP)
                     </button>
 
-                    <button className="secondary-button">
+                    <button
+                      className="secondary-button"
+                    >
                       ↻ Update ATS
                     </button>
 
-                    <button className="dropdown-button">
+                    <button
+                      className="dropdown-button"
+                    >
                       ⌄
                     </button>
+
                   </div>
+
                 </article>
+
               </section>
 
+              {/* Dashboard */}
+
               <section className="dashboard-grid">
+
                 <article className="dashboard-card">
+
                   <div className="card-title">
+
                     <span className="card-title-icon">
                       ▣
                     </span>
-                    <h3>System Information</h3>
+
+                    <h3>
+                      System Information
+                    </h3>
+
                   </div>
 
                   {loading ? (
@@ -626,55 +921,91 @@ function App() {
                     </p>
                   ) : system ? (
                     <div className="info-list">
+
                       <div>
-                        <span>Operating System</span>
-                        <strong>{system.os}</strong>
+                        <span>
+                          Operating System
+                        </span>
+
+                        <strong>
+                          {system.os}
+                        </strong>
                       </div>
 
                       <div>
-                        <span>Kernel</span>
-                        <strong>{system.kernel}</strong>
+                        <span>
+                          Kernel
+                        </span>
+
+                        <strong>
+                          {system.kernel}
+                        </strong>
                       </div>
 
                       <div>
-                        <span>GPU</span>
-                        <strong>{system.gpu}</strong>
+                        <span>
+                          GPU
+                        </span>
+
+                        <strong>
+                          {system.gpu}
+                        </strong>
                       </div>
 
                       <div>
-                        <span>CPU</span>
-                        <strong>{system.cpu}</strong>
+                        <span>
+                          CPU
+                        </span>
+
+                        <strong>
+                          {system.cpu}
+                        </strong>
                       </div>
 
                       <div>
-                        <span>RAM</span>
-                        <strong>{system.memory}</strong>
+                        <span>
+                          RAM
+                        </span>
+
+                        <strong>
+                          {system.memory}
+                        </strong>
                       </div>
+
                     </div>
                   ) : (
                     <p className="muted">
                       Unable to detect system information.
                     </p>
                   )}
+
                 </article>
 
                 <article className="dashboard-card">
+
                   <div className="card-title">
+
                     <span className="card-title-icon">
                       ⚙
                     </span>
-                    <h3>Components Status</h3>
+
+                    <h3>
+                      Components Status
+                    </h3>
+
                   </div>
 
                   <div className="component-list">
+
                     <div>
                       <Status ok={steamReady}>
                         Steam
                       </Status>
+
                       <span>
                         {steamReady
                           ? "Detected"
-                          : "Not detected"}
+                          : "Missing"}
                       </span>
                     </div>
 
@@ -682,6 +1013,7 @@ function App() {
                       <Status ok={truckersMpReady}>
                         TruckersMP CLI
                       </Status>
+
                       <span>
                         {truckersMpReady
                           ? "Ready"
@@ -693,6 +1025,7 @@ function App() {
                       <Status ok={protonReady}>
                         Proton
                       </Status>
+
                       <span>
                         {protonReady
                           ? "Ready"
@@ -704,6 +1037,7 @@ function App() {
                       <Status ok={runtimeReady}>
                         Steam Runtime
                       </Status>
+
                       <span>
                         {runtimeReady
                           ? "Ready"
@@ -712,80 +1046,119 @@ function App() {
                     </div>
 
                     <div>
-                      <Status ok={systemReady}>
-                        NVIDIA GPU
+                      <Status ok={!!system?.gpu}>
+                        GPU
                       </Status>
+
                       <span>
-                        {systemReady
-                          ? "Ready"
+                        {system?.gpu
+                          ? "Detected"
                           : "Unknown"}
                       </span>
                     </div>
 
                     <div>
                       <Status ok={true}>
-                        Internet Connection
+                        Manager
                       </Status>
-                      <span>Connected</span>
+
+                      <span>
+                        Running
+                      </span>
                     </div>
+
                   </div>
+
                 </article>
 
                 <article className="dashboard-card">
+
                   <div className="card-title">
+
                     <span className="card-title-icon">
                       🔧
                     </span>
-                    <h3>Quick Actions</h3>
+
+                    <h3>
+                      Quick Actions
+                    </h3>
+
                   </div>
 
                   <div className="quick-actions">
-                    <button onClick={loadData}>
+
+                    <button
+                      onClick={loadData}
+                    >
                       ↻
-                      <span>Check for Updates</span>
+
+                      <span>
+                        Refresh Detection
+                      </span>
                     </button>
 
                     <button
-                      onClick={() => {
-                        if (steam?.ets2.path) {
-                          console.log(
-                            "Game directory:",
-                            steam.ets2.path,
-                          );
-                        }
-                      }}
+                      onClick={() =>
+                        navigate("ets2")
+                      }
                     >
-                      ▣
-                      <span>Open Game Directory</span>
+                      🚛
+
+                      <span>
+                        ETS2
+                      </span>
                     </button>
 
                     <button
-                      onClick={() => navigate("logs")}
+                      onClick={() =>
+                        navigate("ats")
+                      }
                     >
-                      ▤
-                      <span>Open Log Directory</span>
+                      🚚
+
+                      <span>
+                        ATS
+                      </span>
                     </button>
 
                     <button
-                      onClick={() => navigate("settings")}
+                      onClick={() =>
+                        navigate("settings")
+                      }
                     >
                       ⚙
-                      <span>Settings</span>
+
+                      <span>
+                        Settings
+                      </span>
                     </button>
+
                   </div>
+
                 </article>
+
               </section>
 
+              {/* Logs */}
+
               <section className="log-card">
+
                 <div className="log-header">
+
                   <div className="card-title">
+
                     <span className="card-title-icon">
                       ▤
                     </span>
-                    <h3>Log Output</h3>
+
+                    <h3>
+                      Log Output
+                    </h3>
+
                   </div>
 
                   <div className="log-actions">
+
                     <button
                       onClick={() =>
                         setStartMessage("")
@@ -794,46 +1167,63 @@ function App() {
                       ♲ Clear
                     </button>
 
-                    <button>⌄</button>
+                    <button>
+                      ⌄
+                    </button>
+
                   </div>
+
                 </div>
 
                 <div className="log-output">
+
                   <p>
-                    <span>[SYSTEM]</span>{" "}
+                    <span>
+                      [SYSTEM]
+                    </span>{" "}
                     TruckersMP Linux Manager started
                   </p>
 
                   <p>
-                    <span>[SYSTEM]</span>{" "}
+                    <span>
+                      [SYSTEM]
+                    </span>{" "}
                     Checking system...
                   </p>
 
                   {system && (
                     <p>
-                      <span>[GPU]</span>{" "}
-                      NVIDIA GPU detected: {system.gpu}
+                      <span>
+                        [GPU]
+                      </span>{" "}
+                      GPU detected:{" "}
+                      {system.gpu}
                     </p>
                   )}
 
                   {steam?.installed && (
                     <p>
-                      <span>[STEAM]</span>{" "}
-                      Steam installation found:{" "}
-                      {steam.path}
+                      <span>
+                        [STEAM]
+                      </span>{" "}
+                      Steam detected
                     </p>
                   )}
 
                   {ets2Installed && (
                     <p>
-                      <span>[ETS2]</span>{" "}
+                      <span>
+                        [ETS2]
+                      </span>{" "}
                       Euro Truck Simulator 2 detected
                     </p>
                   )}
 
                   {atsInstalled && (
                     <p>
-                      <span>[ATS]</span>{" "}
+                      <span>
+                        [ATS]
+                      </span>{" "}
                       American Truck Simulator detected
                     </p>
                   )}
@@ -842,31 +1232,58 @@ function App() {
                     protonReady &&
                     runtimeReady && (
                       <p className="log-success">
-                        <span>[READY]</span>{" "}
+                        <span>
+                          [READY]
+                        </span>{" "}
                         All systems ready!
                       </p>
                     )}
 
                   {startMessage && (
                     <p className="log-success">
-                      <span>[TRUCKERSMP]</span>{" "}
+                      <span>
+                        [TRUCKERSMP]
+                      </span>{" "}
                       {startMessage}
                     </p>
                   )}
+
+                  {ets2Running && (
+                    <p className="log-success">
+                      <span>
+                        [ETS2]
+                      </span>{" "}
+                      ETS2 process is running
+                    </p>
+                  )}
+
                 </div>
+
               </section>
+
             </>
           )}
+
         </div>
 
         <footer className="footer">
-          <span>v1.0.0</span>
+
+          <span>
+            v1.0.0
+          </span>
+
           <span>
             Made with ❤️ for the TruckersMP community
           </span>
-          <span>Play Together. Drive Further.</span>
+
+          <span>
+            Play Together. Drive Further.
+          </span>
+
         </footer>
+
       </main>
+
     </div>
   );
 }

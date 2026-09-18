@@ -298,8 +298,14 @@ fn start_truckersmp() -> Result<String, String> {
 
 #[tauri::command]
 fn get_process_status() -> ProcessStatus {
-    let truckersmp = Command::new("pgrep")
+    let truckersmp_cli = Command::new("pgrep")
         .args(["-f", "truckersmp-cli"])
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false);
+
+    let truckersmp_process = Command::new("pgrep")
+        .args(["-f", "TruckersMP"])
         .output()
         .map(|output| output.status.success())
         .unwrap_or(false);
@@ -311,7 +317,7 @@ fn get_process_status() -> ProcessStatus {
         .unwrap_or(false);
 
     ProcessStatus {
-        truckersmp_running: truckersmp,
+        truckersmp_running: truckersmp_cli || truckersmp_process || ets2,
         ets2_running: ets2,
     }
 }
