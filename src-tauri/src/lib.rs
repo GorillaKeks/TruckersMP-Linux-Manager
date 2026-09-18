@@ -39,6 +39,12 @@ struct TruckersMpInfo {
     steam_runtime_path: Option<String>,
 }
 
+#[derive(Serialize)]
+struct ProcessStatus {
+    truckersmp_running: bool,
+    ets2_running: bool,
+}
+
 fn command_output(command: &str, args: &[&str]) -> String {
     Command::new(command)
         .args(args)
@@ -290,6 +296,26 @@ fn start_truckersmp() -> Result<String, String> {
     Ok(format!("TruckersMP started (PID {})", process.id()))
 }
 
+#[tauri::command]
+fn get_process_status() -> ProcessStatus {
+    let truckersmp = Command::new("pgrep")
+        .args(["-f", "truckersmp-cli"])
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false);
+
+    let ets2 = Command::new("pgrep")
+        .args(["-f", "eurotrucks2.exe"])
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false);
+
+    ProcessStatus {
+        truckersmp_running: truckersmp,
+        ets2_running: ets2,
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -298,7 +324,8 @@ pub fn run() {
             get_system_info,
             get_steam_info,
             get_truckersmp_info,
-            start_truckersmp
+            start_truckersmp,
+            get_process_status
         ])
         .run(tauri::generate_context!())
         .expect("error while running application");
